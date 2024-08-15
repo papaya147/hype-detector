@@ -80,6 +80,7 @@ func NumberToToken(number string, isPercentage bool) (string, error) {
 	}
 	token += numberMap[n] + "_"
 
+	// getting magnitude
 	for _, mag := range magnitudeMapKeys {
 		if num >= mag {
 			token += magnitudeMap[mag]
