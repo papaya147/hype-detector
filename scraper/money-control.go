@@ -135,11 +135,5 @@ func (mcs *MoneyControlScraper) scrape(_ context.Context, link string) (*Article
 		return nil, nil
 	}
 
-	return &Article{
-		Url:         link,
-		Title:       title,
-		Description: desc,
-		Content:     strings.TrimSpace(content),
-		Timestamp:   timestamp,
-	}, nil
+	return NewArticle(link, title, desc, content, timestamp), nil
 }
