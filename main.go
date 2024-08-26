@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/papaya147/stonks/scraper"
 	"log/slog"
 	"os"
+
+	"github.com/papaya147/stonks/news_scraper"
 )
 
-func saveArticles() scraper.Articles {
+func saveArticles() news_scraper.Articles {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	s := scraper.NewMoneyControlScraper(logger)
+	s := news_scraper.NewMoneyControlScraper(logger)
 
 	articles := s.Scrape(1, 30)
 
@@ -20,7 +21,7 @@ func saveArticles() scraper.Articles {
 	return articles
 }
 
-func formatArticles(articles scraper.Articles) {
+func formatArticles(articles news_scraper.Articles) {
 	articles.FormatContent()
 
 	err := articles.Save("money-control-articles-formatted")
