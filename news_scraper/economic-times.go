@@ -26,8 +26,8 @@ func NewEconomicTimesScraper(logger *slog.Logger, baseUrl string, msids map[stri
 		logger:          logger,
 		baseUrl:         baseUrl,
 		msids:           msids,
-		articleLinkChan: make(chan string, 10),
-		articleChan:     make(chan *Article, 10),
+		articleLinkChan: make(chan string, 50),
+		articleChan:     make(chan *Article, 50),
 	}
 }
 
