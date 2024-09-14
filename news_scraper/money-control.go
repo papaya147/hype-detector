@@ -9,28 +9,30 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/papaya147/parallelize"
 )
 
 type MoneyControlScraper struct {
-	logger  *slog.Logger
-	baseUrl string
+	logger          *slog.Logger
+	baseUrl         string
+	articleLinkChan chan string
+	articleChan     chan *Article
 }
 
 func NewMoneyControlScraper(logger *slog.Logger) *MoneyControlScraper {
 	return &MoneyControlScraper{
-		logger:  logger,
-		baseUrl: "https://www.moneycontrol.com/news/tags/companies/news",
+		logger:          logger,
+		baseUrl:         "https://www.moneycontrol.com/news/tags/companies/news",
+		articleLinkChan: make(chan string, 10),
+		articleChan:     make(chan *Article, 10),
 	}
 }
 
-func (mcs *MoneyControlScraper) articleLinks(start, end int) []string {
-	var articleLinks []string
+func (mcs *MoneyControlScraper) fetchArticleLinks(start, end int) {
 	c := colly.NewCollector()
 
 	c.OnHTML("ul#cagetory li.clearfix h2 a", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		articleLinks = append(articleLinks, link)
+		mcs.articleLinkChan <- link
 	})
 
 	c.OnError(func(r *colly.Response, err error) {
@@ -49,49 +51,33 @@ func (mcs *MoneyControlScraper) articleLinks(start, end int) []string {
 		c.Wait()
 		mcs.logger.Info(fmt.Sprintf("page %d completed", i))
 	}
-
-	return articleLinks
 }
 
-func (mcs *MoneyControlScraper) Scrape(start, end int) Articles {
-	links := mcs.articleLinks(start, end)
-	var articles []*Article
+func (mcs *MoneyControlScraper) ScrapeAndSave(start, end int) {
+	go func() {
+		defer close(mcs.articleLinkChan)
+		mcs.fetchArticleLinks(start, end)
+	}()
 
-	batchSize := 5
-
-	for i := 0; i < len(links); i += batchSize {
-		end = i + batchSize
-		if end > len(links) {
-			end = len(links)
+	go func() {
+		defer close(mcs.articleChan)
+		for link := range mcs.articleLinkChan {
+			go func() {
+				mcs.scrape(context.Background(), link)
+			}()
 		}
+	}()
 
-		batchLinks := links[i:end]
-
-		g := parallelize.NewGroup()
-		channels := make([]parallelize.WithOutputWithArgsChannels[*Article], len(batchLinks))
-		for j, link := range batchLinks {
-			ch := parallelize.AddWithOutputWithArgs(g, mcs.scrape, context.Background(), link)
-			channels[j] = ch
-		}
-
-		g.Execute()
-
-		for _, ch := range channels {
-			article, err := ch.Read()
-			if err != nil {
-				mcs.logger.Error(err.Error())
-			}
-
-			if article != nil {
-				articles = append(articles, article)
-			}
+	for article := range mcs.articleChan {
+		article.FormatContent()
+		err := article.Save("money-control-articles-formatted")
+		if err != nil {
+			panic(err)
 		}
 	}
-
-	return articles
 }
 
-func (mcs *MoneyControlScraper) scrape(_ context.Context, link string) (*Article, error) {
+func (mcs *MoneyControlScraper) scrape(_ context.Context, link string) {
 	mcs.logger.Info(fmt.Sprintf("scraping link %s", link))
 	c := colly.NewCollector()
 
@@ -127,14 +113,12 @@ func (mcs *MoneyControlScraper) scrape(_ context.Context, link string) (*Article
 
 	err = c.Visit(link)
 	if err != nil {
-		return nil, err
+		mcs.logger.Error(err.Error())
 	}
 
 	c.Wait()
 
-	if content == "" {
-		return nil, nil
+	if content != "" {
+		mcs.articleChan <- NewArticle(link, title, desc, content, timestamp)
 	}
-
-	return NewArticle(link, title, desc, content, timestamp), nil
 }
