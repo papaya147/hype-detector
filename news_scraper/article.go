@@ -137,13 +137,20 @@ func (a *Article) String() string {
 	return a.Timestamp.String() + " - " + a.Title + " - " + a.Description + " - " + a.Content
 }
 
+var nonLetterRegexp = regexp.MustCompile(`[^\w]+`)
+
+func (a *Article) safeFileName() string {
+	safeTitle := nonLetterRegexp.ReplaceAllString(a.Title, "-")
+	return fmt.Sprintf("%d-%s", a.Timestamp.Unix(), safeTitle)
+}
+
 func (a *Article) Save(folder string) error {
 	j, err := json.Marshal(a)
 	if err != nil {
 		return err
 	}
 
-	f := fmt.Sprintf("%s/%d %s.json", folder, a.Timestamp.Unix(), a.Title)
+	f := fmt.Sprintf("%s/%s.json", folder, a.safeFileName())
 	_ = os.Mkdir(folder, os.ModePerm)
 	return os.WriteFile(f, j, 0644)
 }

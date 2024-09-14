@@ -53,7 +53,7 @@ func (mcs *MoneyControlScraper) fetchArticleLinks(start, end int) {
 	}
 }
 
-func (mcs *MoneyControlScraper) ScrapeAndSave(start, end int) {
+func (mcs *MoneyControlScraper) ScrapeAndSave(start, end int, folder string) {
 	go func() {
 		defer close(mcs.articleLinkChan)
 		mcs.fetchArticleLinks(start, end)
@@ -70,7 +70,7 @@ func (mcs *MoneyControlScraper) ScrapeAndSave(start, end int) {
 
 	for article := range mcs.articleChan {
 		article.FormatContent()
-		err := article.Save("money-control-articles-formatted")
+		err := article.Save(folder)
 		if err != nil {
 			panic(err)
 		}

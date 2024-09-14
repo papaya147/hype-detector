@@ -9,15 +9,21 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	s := news_scraper.NewEconomicTimesScraper(logger, "https://economictimes.indiatimes.com/lazy_list_tech.cms", map[string]string{
-		"information-tech": "78570530",
-		"technology":       "78570561",
-		"finance/banking":  "13358319",
-		"energy/power":     "13358361",
-	})
+	scrapers := map[string]news_scraper.Scraper{}
 
-	s.ScrapeAndSave(1, 1, "economic-times-articles-formatted")
+	scrapers["economic-times-articles-formatted"] = news_scraper.NewEconomicTimesScraper(
+		logger.WithGroup("econimic times scraper"),
+		"https://economictimes.indiatimes.com/lazy_list_tech.cms",
+		map[string]string{
+			"information-tech": "78570530",
+			"technology":       "78570561",
+			"finance/banking":  "13358319",
+			"energy/power":     "13358361",
+		})
 
-	// mcs := news_scraper.NewMoneyControlScraper(logger)
-	// mcs.ScrapeAndSave(1, 1)
+	scrapers["money-control-articles-formatted"] = news_scraper.NewMoneyControlScraper(logger.WithGroup("money control scraper"))
+
+	for folder, scraper := range scrapers {
+		scraper.ScrapeAndSave(1, 30, folder)
+	}
 }
