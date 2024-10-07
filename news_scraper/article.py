@@ -5,6 +5,10 @@ from typing import List, Tuple, Dict
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from collections import defaultdict
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+nltk.download('vader_lexicon')
 
 
 class Article:
@@ -46,6 +50,10 @@ class Article:
         for word in content_words:
             word_dict[word] += 1
         self.word_dict = dict(word_dict)
+
+    def sentiment(self) -> Dict[str, float]:
+        sia = SentimentIntensityAnalyzer()
+        return sia.polarity_scores(self.cleaned_content)
 
 
 def load_articles(folder: str) -> List[Article]:

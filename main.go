@@ -26,7 +26,7 @@ func main() {
 			"hotels":             "13357036",
 		})
 
-	// scrapers["money-control-articles-formatted"] = news_scraper.NewMoneyControlScraper(logger.WithGroup("money control scraper"))
+	scrapers["money-control-articles-formatted"] = news_scraper.NewMoneyControlScraper(logger.WithGroup("money control scraper"))
 
 	for folder, scraper := range scrapers {
 		scraper.ScrapeAndSave(1, 30, folder)
