@@ -70,4 +70,4 @@ def save_stock_data_1h() -> None:
 
 
 save_stock_data_1m()
-save_stock_data_1h()
+# save_stock_data_1h()
