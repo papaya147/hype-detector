@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -54,10 +55,10 @@ func (ets *EconomicTimesScraper) fetchArticleLinks(start, end int) {
 			}
 
 			ets.logger.Info(fmt.Sprintf("msid %s page %d completed", msid, i))
+
+			c.Wait()
 		}
 	}
-
-	c.Wait()
 }
 
 func (ets *EconomicTimesScraper) ScrapeAndSave(start, end int, folder string) {
@@ -68,11 +69,15 @@ func (ets *EconomicTimesScraper) ScrapeAndSave(start, end int, folder string) {
 
 	go func() {
 		defer close(ets.articleChan)
+		wg := sync.WaitGroup{}
 		for link := range ets.articleLinkChan {
+			wg.Add(1)
 			go func() {
+				defer wg.Done()
 				ets.scrape(context.Background(), link)
 			}()
 		}
+		wg.Wait()
 	}()
 
 	for article := range ets.articleChan {

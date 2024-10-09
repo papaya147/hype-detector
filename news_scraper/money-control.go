@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -61,11 +62,15 @@ func (mcs *MoneyControlScraper) ScrapeAndSave(start, end int, folder string) {
 
 	go func() {
 		defer close(mcs.articleChan)
+		wg := sync.WaitGroup{}
 		for link := range mcs.articleLinkChan {
+			wg.Add(1)
 			go func() {
+				defer wg.Done()
 				mcs.scrape(context.Background(), link)
 			}()
 		}
+		wg.Wait()
 	}()
 
 	for article := range mcs.articleChan {

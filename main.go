@@ -9,9 +9,13 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	scrapers := map[string]news_scraper.Scraper{}
 
-	scrapers["economic-times-articles-formatted"] = news_scraper.NewEconomicTimesScraper(
+	news_scraper.NewLiveMintScraper(
+		logger.WithGroup("live mint scraper"),
+		"https://www.livemint.com/listing/subsection/market~stock-market-news",
+	).ScrapeAndSave(1, 50, "live-mint-articles-formatted")
+
+	news_scraper.NewEconomicTimesScraper(
 		logger.WithGroup("econimic times scraper"),
 		"https://economictimes.indiatimes.com/lazy_list_tech.cms",
 		map[string]string{
@@ -24,11 +28,10 @@ func main() {
 			"two/three-wheelers": "64829323",
 			"finance":            "13358311",
 			"hotels":             "13357036",
-		})
+		},
+	).ScrapeAndSave(1, 30, "economic-times-articles-formatted")
 
-	scrapers["money-control-articles-formatted"] = news_scraper.NewMoneyControlScraper(logger.WithGroup("money control scraper"))
-
-	for folder, scraper := range scrapers {
-		scraper.ScrapeAndSave(1, 30, folder)
-	}
+	news_scraper.NewMoneyControlScraper(
+		logger.WithGroup("money control scraper"),
+	).ScrapeAndSave(1, 30, "money-control-articles-formatted")
 }
