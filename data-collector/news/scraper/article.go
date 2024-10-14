@@ -1,4 +1,4 @@
-package news_scraper
+package scraper
 
 import (
 	"encoding/json"

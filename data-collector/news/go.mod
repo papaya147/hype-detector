@@ -1,4 +1,4 @@
-module github.com/papaya147/stonks
+module github.com/papaya147/stonks/data-collector
 
 go 1.22.1
 

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/papaya147/stonks/news_scraper"
+	"github.com/papaya147/stonks/data-collector/scraper"
 )
 
 func main() {
@@ -13,12 +13,12 @@ func main() {
 
 	dataFolder := "data/news"
 
-	news_scraper.NewLiveMintScraper(
+	scraper.NewLiveMintScraper(
 		logger.WithGroup("live mint scraper"),
 		"https://www.livemint.com/listing/subsection/market~stock-market-news",
 	).ScrapeAndSave(1, 50, fmt.Sprintf("%s/live-mint-articles-formatted", dataFolder))
 
-	news_scraper.NewEconomicTimesScraper(
+	scraper.NewEconomicTimesScraper(
 		logger.WithGroup("econimic times scraper"),
 		"https://economictimes.indiatimes.com/lazy_list_tech.cms",
 		map[string]string{
@@ -34,7 +34,7 @@ func main() {
 		},
 	).ScrapeAndSave(1, 30, fmt.Sprintf("%s/economic-times-articles-formatted", dataFolder))
 
-	news_scraper.NewMoneyControlScraper(
+	scraper.NewMoneyControlScraper(
 		logger.WithGroup("money control scraper"),
 	).ScrapeAndSave(1, 30, fmt.Sprintf("%s/money-control-articles-formatted", dataFolder))
 }
