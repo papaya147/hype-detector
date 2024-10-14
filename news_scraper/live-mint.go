@@ -3,12 +3,13 @@ package news_scraper
 import (
 	"context"
 	"fmt"
-	"github.com/gocolly/colly"
 	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gocolly/colly"
 )
 
 type LiveMintScraper struct {
@@ -135,7 +136,7 @@ func (lms *LiveMintScraper) scrape(_ context.Context, link string) {
 
 	c.Wait()
 
-	if timestamp.Unix() > 0 {
+	if timestamp.Unix() > 0 && content != "" {
 		lms.articleChan <- NewArticle(link, title, desc, content, timestamp)
 	}
 }

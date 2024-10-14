@@ -142,7 +142,7 @@ func (ets *EconomicTimesScraper) scrape(_ context.Context, link string) {
 
 	c.Wait()
 
-	if content != "" {
+	if timestamp.Unix() > 0 && content != "(You can now subscribe to our Economic Times WhatsApp channel)" {
 		ets.articleChan <- NewArticle(link, title, desc, content, timestamp)
 	}
 }
