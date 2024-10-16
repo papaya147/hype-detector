@@ -11,7 +11,7 @@ import (
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	dataFolder := "data/news"
+	dataFolder := "../../data/news"
 
 	scraper.NewLiveMintScraper(
 		logger.WithGroup("live mint scraper"),
