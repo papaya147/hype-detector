@@ -233,7 +233,7 @@ def rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
 
     rs = avg_gain / avg_loss
 
-    rsi = 100 - (100 / (1 + rs))
+    rsi = 1 - (1 / (1 + rs))
     rsi.name = "rsi"
 
     return rsi
