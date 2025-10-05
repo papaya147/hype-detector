@@ -35,8 +35,8 @@ The repository is structured around three main components:
 ```bash
 git clone https://github.com/papaya147/hype-detector.git
 cd hype-detector
-conda  create  --prefix  ./env  python=3.11
-conda  activate  ./env
+conda create --prefix ./env python=3.11
+conda activate ./env
 ```
 2. News collection (optional)
 ```bash
@@ -46,8 +46,8 @@ go run .
 3. Stock price collection (optional)
 ```bash
 cd data-collector/stock-prices
-conda  create  --prefix  ./env  python=3.11
-conda  activate  ./env
+conda create --prefix ./env python=3.11
+conda activate ./env
 pip install -r requirements.txt
 python main.py
 ```
